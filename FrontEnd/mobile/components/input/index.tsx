@@ -36,6 +36,7 @@ export function Input({
           <TextInput
             style={styles.input}
             placeholder={placeholder}
+            placeholderTextColor="#7e7e80" // cor do placeholder
             onBlur={onBlur}
             value={value}
             onChangeText={onChange}
@@ -55,9 +56,12 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 44,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.input,
     paddingHorizontal: 10,
     borderRadius: 4,
+    borderColor:"#7e7e80",
+    borderWidth: 1,
+    color:"#D4D4D8"
   },
   errorText: {
     color: "red",
