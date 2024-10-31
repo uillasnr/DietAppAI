@@ -6,14 +6,14 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { Controller } from "react-hook-form";
+import { Controller, Control } from "react-hook-form";
 
 interface InputProps {
   name: string;
-  control: any;
+  control: Control<any>;
   placeholder?: string;
   rules?: object;
-  error?: string;
+  errors?: string;
   keyboardType: KeyboardTypeOptions;
 }
 
@@ -22,30 +22,39 @@ export function Input({
   control,
   placeholder,
   rules,
-  error,
+  errors,
   keyboardType,
 }: InputProps) {
   return (
     <View style={styles.container}>
-        
       <Controller
         control={control}
         name={name}
         rules={rules}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              errors ? styles.inputError : null
+            ]}
             placeholder={placeholder}
-            placeholderTextColor="#7e7e80" // cor do placeholder
+            placeholderTextColor="#7e7e80"
             onBlur={onBlur}
             value={value}
-            onChangeText={onChange}
+            onChangeText={(text) => {
+              // Adiciona um ponto após o primeiro dígito para o campo "height"
+              if (name === "height") {
+                if (text.length === 1) {
+                  text += ".";
+                }
+              }
+              onChange(text);
+            }}
             keyboardType={keyboardType}
           />
         )}
       />
-
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {errors && <Text style={styles.errorText}>{errors}</Text>}
     </View>
   );
 }
@@ -56,15 +65,19 @@ const styles = StyleSheet.create({
   },
   input: {
     height: 44,
-    backgroundColor: Colors.input,
+    backgroundColor: Colors.white,
     paddingHorizontal: 10,
     borderRadius: 4,
-    borderColor:"#7e7e80",
+    borderColor: "#7e7e80",
     borderWidth: 1,
-    color:"#D4D4D8"
+    color: Colors.black
+  },
+  inputError: {
+    borderColor: "red",
   },
   errorText: {
     color: "red",
     marginTop: 4,
+    fontSize: 12,
   },
 });
