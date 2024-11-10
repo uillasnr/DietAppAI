@@ -11,10 +11,12 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Colors } from "@/constants/Colors";
+import { NotificationButton } from "../NotificationButton";
 
 interface HeaderProps {
   step: string;
   title: string;
+ // mealDetails: { nome: string; horario: string }[];  // Adicionando a propriedade mealDetails
 }
 
 export function Header({ step, title }: HeaderProps) {
@@ -22,13 +24,18 @@ export function Header({ step, title }: HeaderProps) {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.row}>
-          <Pressable onPress={() => router.back()}>
-            <Feather name="arrow-left" size={24} color={Colors.black} />
-          </Pressable>
+          {/* Área da seta e texto do passo */}
+          <View style={styles.leftContainer}>
+            <Pressable onPress={() => router.back()}>
+              <Feather name="arrow-left" size={24} color={Colors.black} />
+            </Pressable>
+            <Text style={styles.text}>
+              {step} <Feather name="loader" size={16} color={Colors.black} />
+            </Text>
+          </View>
 
-          <Text style={styles.text}>
-            {step} <Feather name="loader" size={16} color={Colors.black} />
-          </Text>
+          {/* Ícone de sino para notificações no canto direito */}
+          <NotificationButton />
         </View>
 
         <Text style={styles.title}>{title}</Text>
@@ -46,11 +53,11 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight! + 25 : 25,
 
     // Sombras
-    shadowColor: "#000000", // cor da sombra
-    shadowOffset: { width: 0, height: 10 }, // deslocamento da sombra
-    shadowOpacity: 0.3, // opacidade da sombra
-    shadowRadius: 50, // raio de desfoque
-    elevation: 30, // usado no Android para sombra
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 50,
+    elevation: 30,
   },
   content: {
     paddingLeft: 16,
@@ -61,9 +68,14 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    gap: 8,
+    justifyContent: "space-between", 
     alignItems: "center",
     paddingBottom: 10,
+  },
+  leftContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   text: {
     fontSize: 18,
