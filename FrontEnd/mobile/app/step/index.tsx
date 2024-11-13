@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   content: {
     paddingLeft: 16,
     paddingRight: 16,
-    marginTop: 80,
+    marginTop: 50,
   },
   label: {
     fontSize: 16,
