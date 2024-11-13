@@ -7,6 +7,7 @@ import {
   Share,
   ActivityIndicator,
   Image,
+  Modal,
 } from "react-native";
 import { useDataStore } from "../../store/data";
 import { api } from "../../services/api";
@@ -14,7 +15,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Colors } from "../../constants/Colors";
 import { Data } from "../../types/data";
 import { Link, router } from "expo-router";
-import { Ionicons, Feather } from "@expo/vector-icons";
+import { Feather } from "@expo/vector-icons";
+import { useState } from "react";
 
 interface ResponseData {
   data: Data;
@@ -22,6 +24,9 @@ interface ResponseData {
 
 export default function Nutrition() {
   const user = useDataStore((state) => state.user);
+  const { setMealDetails } = useDataStore();
+  const [showExercises, setShowExercises] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
 
   const { data, isFetching, error } = useQuery({
     queryKey: ["nutrition"],
@@ -31,37 +36,39 @@ export default function Nutrition() {
           throw new Error("Filed load nutrition");
         }
 
-          // Função para adicionar o delay de 5 segundos
-        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+        // Função para adicionar o delay de 5 segundos
+        const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+         await delay(5000);
 
-        // Espera 5 segundos antes de fazer a requisição
-        await delay(5000); 
+        const response = await api.post<ResponseData>("/create" , {
+              name: user.name,
+              age: user.age,
+              gender: user.gender,
+              height: user.height,
+              weight: user.weight,
+              objective: user.objective,
+              level: user.level,
+        } );
+        // Atualizar o estado com os dados de refeição
+        setMealDetails(response.data.data);
 
-        const response = await api.post<ResponseData>(
-          "/create", {
-          name: user.name,
-          age: user.age,
-          gender: user.gender,
-          height: user.height,
-          weight: user.weight,
-          objective: user.objective,
-          level: user.level,
-        }  
-        );
-
-        console.log("API Response:", response.data); 
+     //   console.log("API Response:", response.data);
         return response.data.data;
       } catch (err) {
         console.log(err);
-        return null; 
+        return null;
       }
     },
   });
 
+  const toggleModal = () => {
+    setIsModalVisible((prevState) => !prevState); 
+  };
+
   async function handleShare() {
     if (!data) return;
 
-    const supplements = data.suplementos.join(", "); // Acesso correto
+    const supplements = data.suplementos.join(", "); 
     const meals = data["refeições"]
       .map(
         (meal) =>
@@ -97,25 +104,60 @@ export default function Nutrition() {
       </View>
     );
   }
-  const mealNames = data?.refeições?.map((refeicao) => refeicao.nome) || [];
-  console.log("Nomes das refeições:", mealNames);
 
   const getMealIcon = (mealName: string) => {
     switch (mealName.toLowerCase()) {
       case "café da manhã":
-        return <Image style={{width: 30, height: 30}} source={require('../../app/../assets/images/cafe-da-manha.png')} />;
+        return (
+          <Image
+            style={{ width: 30, height: 30 }}
+            source={require("../../app/../assets/images/cafe-da-manha.png")}
+          />
+        );
       case "lanche da manhã":
-        return <Image style={{width: 30, height: 30}} source={require('../../app/../assets/images/maçã.png')} />;
+        return (
+          <Image
+            style={{ width: 30, height: 30 }}
+            source={require("../../app/../assets/images/maçã.png")}
+          />
+        );
       case "almoço":
-        return  <Image style={{width: 30, height: 30}} source={require('../../app/../assets/images/comida.png')} />;
+        return (
+          <Image
+            style={{ width: 30, height: 30 }}
+            source={require("../../app/../assets/images/comida.png")}
+          />
+        );
       case "lanche da tarde":
-        return <Image style={{width: 30, height: 30}} source={require('../../app/../assets/images/torrada.png')} />;
+        return (
+          <Image
+            style={{ width: 30, height: 30 }}
+            source={require("../../app/../assets/images/torrada.png")}
+          />
+        );
       case "jantar":
-        return <Image style={{width: 30, height: 30}} source={require('../../app/../assets/images/jantar.png')} />;
+        return (
+          <Image
+            style={{ width: 30, height: 30 }}
+            source={require("../../app/../assets/images/jantar.png")}
+          />
+        );
       case "lanche noturno (opcional)":
-        return <Ionicons name="moon-outline" size={20} color="black" />;
+        return (
+          <Image
+            style={{ width: 30, height: 30 }}
+            source={require("../../app/../assets/images/lanche-noite.png")}
+          />
+        );
+        case "ceia":
+          return (
+            <Image
+              style={{ width: 30, height: 30 }}
+              source={require("../../app/../assets/images/lanche-noite.png")}
+            />
+          );
       default:
-        return null; 
+        return null;
     }
   };
 
@@ -137,7 +179,22 @@ export default function Nutrition() {
             <Text style={styles.name}>Nome: {data.nome}</Text>
             <Text style={styles.objective}>Foco: {data.objetivo}</Text>
 
-            <Text style={styles.label}>Refeições:</Text>
+            <View style={styles.rowContainer}>
+              <Text style={styles.label}>Refeições:</Text>
+              {/* Botão que aciona o Modal */}
+              <Pressable
+                style={styles.buttonExercícios}
+                onPress={() => {
+                  setShowExercises((prev) => !prev);
+                  toggleModal(); 
+                }}
+              >
+                <Text style={styles.buttonTextExercises}>
+                  Ver Dicas de Exercícios
+                </Text>
+              </Pressable>
+            </View>
+
             <ScrollView>
               <View style={styles.foods}>
                 {data &&
@@ -202,6 +259,37 @@ export default function Nutrition() {
                   )}
                 </View>
               </View>
+
+              {/* Exibe o modal com as dicas de exercícios */}
+              <Modal
+                visible={isModalVisible} 
+                animationType="slide"
+                transparent={true}
+                onRequestClose={toggleModal} 
+              >
+                <View style={styles.modalOverlay}>
+                  <View style={styles.modalContent}>
+                    <Text style={styles.modalTitle}>Dicas de Exercícios</Text>
+                    {/* Adicione suas dicas de exercícios aqui */}
+                    {data?.exercicios?.map((exercicio, index) => (
+                      <View key={index} style={styles.exercise}>
+                        <Text style={styles.exerciseName}>
+                          {exercicio.nome}
+                        </Text>
+                        <Text>Intensidade: {exercicio.intensidade}</Text>
+                        <Text>Duração: {exercicio.duracao}</Text>
+                        <Text>Frequência: {exercicio.frequencia}</Text>
+                      </View>
+                    ))}
+                    <Pressable
+                      style={styles.buttonClose}
+                      onPress={toggleModal} 
+                    >
+                      <Text style={styles.buttonCloseText}>Fechar</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              </Modal>
 
               <Pressable
                 style={styles.button}
@@ -278,7 +366,6 @@ const styles = StyleSheet.create({
   objective: {
     color: Colors.white,
     fontSize: 16,
-    marginBottom: 24,
   },
   label: {
     color: Colors.white,
@@ -347,5 +434,66 @@ const styles = StyleSheet.create({
     color: Colors.white,
     fontSize: 16,
     fontWeight: "bold",
+  },
+
+  buttonExercícios: {
+    width: 175,
+    backgroundColor: Colors.blue,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 8,
+    marginBottom: 24,
+    marginTop: 5,
+  },
+  buttonTextExercises: {
+    color: Colors.white,
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+  },
+  modalContent: {
+    backgroundColor: Colors.white,
+    padding: 20,
+    borderRadius: 10,
+    width: "90%",
+    maxHeight: "90%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    textAlign: "center",
+  },
+  exercise: {
+    backgroundColor: "rgba(208, 208, 208, 0.40)",
+    padding: 8,
+    borderRadius: 4,
+    marginBottom: 8,
+  },
+  exerciseName: {
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  buttonClose: {
+    backgroundColor: Colors.blue,
+    padding: 10,
+    marginTop: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  buttonCloseText: {
+    color: Colors.white,
+    fontWeight: "500",
+  },
+  rowContainer: {
+    flexDirection: "row", 
+    alignItems: "center", 
+    justifyContent: "space-between", 
   },
 });

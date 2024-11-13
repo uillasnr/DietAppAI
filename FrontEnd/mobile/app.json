@@ -2,7 +2,7 @@
   "expo": {
     "name": "Dieta.AI",
     "slug": "mobile",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon2.png",
     "scheme": "myapp",
@@ -27,13 +27,17 @@
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+    "notification": {
+      "icon": "./assets/images/icon8.png",
+      "color":  "#ffffff"
+    },
     "plugins": [
       "expo-router",
       [
         "expo-notifications",
         {
-          "icon": "./assets/images/icon2.png",
-          "color": "#4CAF50"
+          "icon": "./assets/images/icon8.png",
+          "color": "#ffffff"
         }
       ]
     ],
