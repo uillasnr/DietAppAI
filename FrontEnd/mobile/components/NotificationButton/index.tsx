@@ -11,6 +11,7 @@ import moment from "moment";
 import { useDataStore } from "@/store/data";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Set notification handler once at the top level
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -30,14 +31,16 @@ export function NotificationButton() {
   }, []);
 
   useEffect(() => {
-    if (storeMealDetails.length > 0) {setMealDetails(storeMealDetails); }
+    if (storeMealDetails.length > 0) {
+      setMealDetails(storeMealDetails);
+    }
   }, [storeMealDetails]);
 
   useEffect(() => {
-    if (mealDetails.length > 0) {
+    if (mealDetails.length > 0 && isNotificationsEnabled) {
       scheduleMealNotifications();
     }
-  }, [mealDetails]);
+  }, [mealDetails, isNotificationsEnabled]);
 
   const loadMealDetails = async () => {
     const storedMealDetails = await getMealDetails();
@@ -48,22 +51,13 @@ export function NotificationButton() {
 
   const checkNotificationsStatus = async () => {
     const { status } = await Notifications.getPermissionsAsync();
-    setIsNotificationsEnabled(status === "granted");
-
-    // Carregar estado de notificações salvo no AsyncStorage
     const savedNotificationStatus = await AsyncStorage.getItem("notificationsEnabled");
-
-    if (savedNotificationStatus === "true") {
-      setIsNotificationsEnabled(true);
-    } else {
-      setIsNotificationsEnabled(false);
-    }
+    setIsNotificationsEnabled(savedNotificationStatus === "true" && status === "granted");
   };
 
   const registerForPushNotificationsAsync = async () => {
     try {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
       let finalStatus = existingStatus;
 
       if (existingStatus !== "granted") {
@@ -86,20 +80,8 @@ export function NotificationButton() {
     }
   };
 
-  const getNextOccurrence = (mealTime: string, currentTime: moment.Moment) => {
-    const [hours, minutes] = mealTime.split(":").map(Number);
-    const mealMoment = moment(currentTime).set({
-      hours,
-      minutes,
-      seconds: 0,
-      milliseconds: 0,
-    });
-
-    if (mealMoment.isBefore(currentTime)) {
-      mealMoment.add(1, "day");
-    }
-
-    return mealMoment;
+  const getNotificationIdentifier = (mealName: string, time: string) => {
+    return `Notification: ${mealName} ⏱ ${time}`;
   };
 
   const scheduleMealNotifications = async () => {
@@ -107,19 +89,17 @@ export function NotificationButton() {
     if (!hasPermission) return;
 
     try {
+      // Cancel all existing notifications first
       await Notifications.cancelAllScheduledNotificationsAsync();
 
       if (mealDetails && mealDetails.length > 0) {
-        const currentTime = moment().local();
-
         for (const meal of mealDetails) {
-          const nextMealTime = getNextOccurrence(meal.horario, currentTime);
           const [hours, minutes] = meal.horario.split(":").map(Number);
+          const identifier = getNotificationIdentifier(meal.nome, meal.horario);
 
-          console.log(`🔔 Agendando notificação: ${meal.nome} às ${meal.horario} ${nextMealTime.isSame(currentTime, "day") ? "(hoje)" : "(amanhã)"}`
-          );
-
+          // Schedule a single notification per meal
           await Notifications.scheduleNotificationAsync({
+            identifier, // Use a unique identifier for each notification
             content: {
               title: `⏰ Hora do ${meal.nome}!`,
               body: `Não se esqueça de fazer uma refeição saudável às ${meal.horario}.`,
@@ -135,10 +115,10 @@ export function NotificationButton() {
             },
           });
 
-          console.log("⏱ Notificação agendada para todos os dias no horário:",`${meal.horario}`, "⏱");
+          console.log(
+            `🔔 Notificação agendada para ${meal.nome} às ${meal.horario} (ID: ${identifier})`
+          );
         }
-      } else {
-        console.log("⚠️ Nenhum detalhe de refeição disponível para agendamento.");
       }
 
       if (!isNotificationsEnabled) {
@@ -148,18 +128,16 @@ export function NotificationButton() {
           [{ text: "Ótimo!" }]
         );
       }
-      // Salvar estado de notificações no AsyncStorage
-      await AsyncStorage.setItem("notificationsEnabled", "true");
 
-      setIsNotificationsEnabled(true);
       await AsyncStorage.setItem("notificationsEnabled", "true");
+      setIsNotificationsEnabled(true);
     } catch (error) {
+      console.error("Erro ao agendar notificações:", error);
       Alert.alert(
         "Erro",
         "Não foi possível agendar as notificações. Tente novamente.",
         [{ text: "OK" }]
       );
-      console.error("Erro ao agendar notificações:", error);
     }
   };
 
