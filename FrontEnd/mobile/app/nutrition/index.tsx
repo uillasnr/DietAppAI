@@ -47,7 +47,7 @@ export default function Nutrition() {
               height: user.height,
               weight: user.weight,
               objective: user.objective,
-              level: user.level,
+              level: user.level, 
         } );
         // Atualizar o estado com os dados de refeição
         setMealDetails(response.data.data);
@@ -67,21 +67,20 @@ export default function Nutrition() {
 
   async function handleShare() {
     if (!data) return;
-
-    const supplements = data.suplementos.join(", "); 
+  
+    const supplements = data.suplementos.join(", ");
     const meals = data["refeições"]
-      .map(
-        (meal) =>
-          `Nome: ${meal.nome}, Horário: ${
-            meal.horario
-          }, Alimentos: ${meal.alimentos.join(", ")}`
+      .map((meal) => 
+        `🍽️ *${meal.nome}*\n🕒 Horário: ${meal.horario}\n\n🍲 Alimentos:\n ${meal.alimentos.join(", ")}`
       )
-      .join("\n");
-
-    const message = `Dieta: ${data.nome}\nObjetivo: ${data.objetivo}\nRefeições:\n${meals}\nDica Suplemento: ${supplements}`;
-
+      .join("\n\n");
+  
+    const message = `🌟 *Dieta*: ${data.nome}\n\n🎯 *Objetivo*: ${data.objetivo}\n\n🍽️ *Refeições*:\n\n${meals}\n\n💊 *Dica de Suplemento*:\n   ${supplements}`;
+  
     await Share.share({ message });
   }
+  
+  
 
   if (isFetching) {
     return (
