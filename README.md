@@ -13,12 +13,14 @@ Dieta.AI é um aplicativo mobile inovador que utiliza inteligência artificial p
 - ✨ Criação de dieta personalizada usando IA
 - 📈 Recomendações baseadas no perfil do usuário
 - 🔄 Planos alimentares detalhados
+- 🔔 **Notificações diárias** para lembrar o usuário dos horários das refeições
+- 🏋️ **Dicas de Exercícios** personalizadas para ajudar o usuário a manter uma vida ativa
 
 ## 📱 Telas do Aplicativo
 
-| Tela Inicial | Coleta de Dados (Passo 1) | Finalização (Passo 2) | Plano Alimentar |
-|--------------|----------------------------|-----------------------|------------------|
-| <img src="./FrontEnd/mobile/assets/images/screen1.jpg" alt="Tela Inicial" width="200"/> | <img src="./FrontEnd/mobile/assets/images/screen2.jpg" alt="Coleta de Dados" width="200"/> | <img src="./FrontEnd/mobile/assets/images/screen3.jpg" alt="Finalização" width="200"/> | <img src="./FrontEnd/mobile/assets/images/screen4.jpg" alt="Plano Alimentar" width="200"/> |
+| Tela Inicial | Coleta de Dados (Passo 1) | Finalização (Passo 2) | Plano Alimentar | Notificações |
+|--------------|----------------------------|-----------------------|------------------|------------------|
+| <img src="./FrontEnd/mobile/assets/images/screen1.jpg" alt="Tela Inicial" width="200"/> | <img src="./FrontEnd/mobile/assets/images/screen2.jpg" alt="Coleta de Dados" width="200"/> | <img src="./FrontEnd/mobile/assets/images/screen3.jpg" alt="Finalização" width="200"/> | <img src="./FrontEnd/mobile/assets/images/screen4.jpg" alt="Plano Alimentar" width="200"/> | <img src="./FrontEnd/mobile/assets/images/screen5.jpg" alt="Dicas de Exercícios" width="200"/> |
 
 ## 🚀 Tecnologias Utilizadas
 
@@ -50,6 +52,7 @@ npm install
 
 # Inicie o projeto
 npm start
+
 ```
 
 
